@@ -247,13 +247,14 @@ class ScriptDisplay {
 
 }
 class GlyphVariation {
-    constructor(glyph) {
+    constructor(glyph,id="") {
         
         this.strokes=[];
         this.glyph=glyph;
-        this.id="";
+        this.id=id;
         this.offset=new Victor(0,0); //relative to glyph origin
         this.offsetRotation=0; //degrees, relative to glyph rotation
+        glyph.variations[id]=this;
     }
     
 }

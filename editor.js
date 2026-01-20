@@ -6,10 +6,12 @@ import {scriptDisplay} from './main.js';
 const doc={
 
 }
+
 for (let e of document.querySelectorAll("*")) {
     doc[e.id]=e;
 }
-
+doc.glyphsel=document.querySelector(".glyphselc");
+doc.variationsel=document.querySelector(".variationsel");
 let strokes=[
 
 ]
@@ -55,6 +57,7 @@ class Stroke {
                 drawCatmullRom(context, this.points);
                 context.strokeShape(shape);
             }
+            
         });
         
         curvelayer.add(this.shape);
@@ -103,8 +106,9 @@ class Stroke {
             e.cancelBubble=true;
             dragging=false;
             anydragging=false;
-            
+            porttoglyphs();
         });
+        porttoglyphs();
     }
     newPoint(x,y) {
         const pt=new Point(x,y);
@@ -134,6 +138,7 @@ class Point {
         this.stroke=null;
         this.shape=null;
         pointselection=[this];
+        porttoglyphs();
     }
     toVictor() {
         return new Victor(this.x, this.y);
@@ -190,7 +195,7 @@ const layer = new Konva.Layer();
 stage.add(curvelayer);
 stage.add(layer);
 
-strokeselection=new Stroke();
+strokeselection=null;
 
 
 
@@ -222,35 +227,106 @@ function eraseall() {
 
 }
 function porttoglyphs() {
-    for (let st of strokes) {
+    console.log("PORTING STROKES:...");
+    console.log(strokes);
+    glyphvarselection.strokes=[];
+    for (let si=0;si<strokes.length;si++) {
+        const st=strokes[si];
+        const nst=new sys.GlyphStroke(glyphvarselection);
         for (let i=0;i<st.points.length;i++) {
-            glyphvarselection.strokes.points[i].position=new Victor(st.points[i].x,st.points[i].y);
+            const npt=new sys.GlyphStrokePoint(`${glyphvarselection}_${si+i}`,new Victor(st.points[i].x,st.points[i].y),nst);
+            nst.points.push(npt);  
             
         }
     }
+
+    // for (let si=0;si<strokes.length;si++) {
+    //     const st=strokes[si];
+    //     for (let i=0;i<st.points.length;i++) {
+    //         glyphvarselection.strokes[si].points[i].position=new Victor(st.points[i].x,st.points[i].y);
+            
+    //     }
+    // }
 }
 doc.glyphsel.style.display="none";
 doc.variationsel.style.display="none";
 function loadglyphvar(glyphvar) {
+    console.log("STROKEYS");
+    console.log(glyphvar.strokes);
     for (let s of glyphvar.strokes) {
         const st=new Stroke();
         for (let p of s.points) {
             const pt=st.newPoint(p.x,p.y);
+            pt.toKonva();
         }
         
     }
     glyphvarselection=glyphvar;
     doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
+    eraseall();
+    
+    drawglyph();
 }
 function loadglyph(glyphobj) {
     eraseall();
-    for (let v of glyphobj.variations) {
-        doc.variationpanel.replaceChildren();
-        const btn=document.cloneNode(variationsel);
+    console.log(glyphobj);
+    doc.variationpanel.replaceChildren();
+    let o=0;
+    for (let vi in glyphobj.variations) { 
+        const v=glyphobj.variations[vi];
+        
+        const btn=doc.variationsel.cloneNode(true);
         btn.innerText=v.id;
         btn.addEventListener('click',()=>{
             loadglyphvar(v);
         })
+        
+        doc.variationpanel.appendChild(btn);
         btn.style.display="flex";
+        if (o==0) {
+            loadglyphvar(v);
+        }
+        o+=1;
     }
+    
+    glyphselection=glyphobj;
 }
+function newglyph() {
+    const glyph=new sys.Glyph();
+    glyph.id=`Glyph${scriptDisplay.glyphs.length}`;
+    const glyphv=new sys.GlyphVariation(glyph,`Variation${Object.keys(glyph.variations).length}`);
+    
+    glyphselection=glyph;
+    glyphvarselection=glyphv;
+    const btn=doc.glyphsel.cloneNode(true);
+    btn.querySelector(".glyphsel").innerText=glyph.id;
+    console.log("makingnewglyphbtn");
+    console.log(btn);
+    btn.addEventListener('click',()=>{
+        loadglyph(glyph);
+    })
+    
+    btn.style.display="flex";
+    doc.glyphlist.appendChild(btn);
+    loadglyph(glyph);
+    loadglyphvar(glyphv);
+}
+function newvariation() {
+    const glyphv=new sys.GlyphVariation(glyphselection,`Variation${Object.keys(glyphselection.variations).length}`);
+    glyphvarselection=glyphv;
+
+    const btn=doc.variationsel.cloneNode(true);
+    btn.innerText=glyphv.id;
+    btn.addEventListener('click',()=>{
+        loadglyphvar(glyphv);
+    })
+     btn.style.display="flex";
+    doc.variationpanel.appendChild(btn);
+    loadglyphvar(glyphv);
+}
+doc.newglyph.addEventListener('click',()=>{
+    newglyph();
+})
+doc.newvari.addEventListener('click',()=>{
+    newvariation();
+})
