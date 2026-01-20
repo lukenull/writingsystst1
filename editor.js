@@ -1,10 +1,20 @@
 import Konva from "https://cdn.jsdelivr.net/npm/konva@9.3.0/+esm";
 import Victor from 'https://cdn.skypack.dev/victor';
 import * as sys from './sys.js';
+import {scriptDisplay} from './main.js';
 
-const strokes=[
+const doc={
+
+}
+for (let e of document.querySelectorAll("*")) {
+    doc[e.id]=e;
+}
+
+let strokes=[
 
 ]
+let glyphselection=null;
+let glyphvarselection=null;
 function drawCatmullRom(context, pts) {
     if (pts.length < 2) return;
 
@@ -201,4 +211,46 @@ stage.on('click', function (e) {
     point.toKonva();
    
 });
+function eraseall() {
+    layer.removeChildren();
+    layer.draw();
+    curvelayer.removeChildren();
+    curvelayer.draw();
+    strokeselection=null;
+    pointselection=[];
+    strokes=[];
 
+}
+function porttoglyphs() {
+    for (let st of strokes) {
+        for (let i=0;i<st.points.length;i++) {
+            glyphvarselection.strokes.points[i].position=new Victor(st.points[i].x,st.points[i].y);
+            
+        }
+    }
+}
+doc.glyphsel.style.display="none";
+doc.variationsel.style.display="none";
+function loadglyphvar(glyphvar) {
+    for (let s of glyphvar.strokes) {
+        const st=new Stroke();
+        for (let p of s.points) {
+            const pt=st.newPoint(p.x,p.y);
+        }
+        
+    }
+    glyphvarselection=glyphvar;
+    doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
+}
+function loadglyph(glyphobj) {
+    eraseall();
+    for (let v of glyphobj.variations) {
+        doc.variationpanel.replaceChildren();
+        const btn=document.cloneNode(variationsel);
+        btn.innerText=v.id;
+        btn.addEventListener('click',()=>{
+            loadglyphvar(v);
+        })
+        btn.style.display="flex";
+    }
+}

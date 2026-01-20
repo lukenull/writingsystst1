@@ -109,3 +109,4 @@ scriptDisplay.mapLastKeyGroupBehavior({
         scriptDisplay.drawGlyph("glyph-b", "main", char, {glyph:{offset:new Victor(0,0.5),offsetRotation:20},strokes:{}});
     }
 });
+export {scriptDisplay};
