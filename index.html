@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Writing System Demo</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color:#111;
+        }
+
+        #script-display {
+            border: 1px solid #aaa;
+            margin-top: 10px;
+        }
+
+        input {
+            width: 300px;
+            font-size: 18px;
+            padding: 6px;
+        }
+        #editor-display {
+            margin-top: 20px;
+            border: 1px solid black;
+            height:500px;
+            width:500px;
+            background-color:white;
+        }
+        #topbar {
+            height:40px;
+        }
+        .tabbtn {
+            height:100%;
+            width:200px;
+            border: 1px solid black;
+            font-size:24px;
+        }
+        .tabwindow {
+            width:100%;
+        }
+        #logiceditor {
+            display:none;
+        }
+        #edcent {
+            width:75%;
+            height:550px;
+            align-content:center;
+            justify-items:center;
+            
+        }
+        #variationpanel {
+            margin-top:20px;
+            width:50%;
+            margin-left:5%;
+            background-color:#222;
+            height:160px;
+            display:flex;
+            flex-direction:row;
+            flex-wrap:wrap;
+            border: 1px solid white;
+        }
+        .variationsel {
+            height:25%;
+            background-color:black;
+            width:100px;
+            display:flex;
+            border-radius:5px;
+            align-items:center;
+            justify-content:center;
+            font-family:'Courier New', Courier, monospace;
+            color:white;
+        }
+        .glyphselc {
+            width:100%;
+            background-color:#111;
+            height:80px;
+            display:flex;
+            border-radius:5px;
+            flex-direction:row;
+            flex-wrap:nowrap;
+            overflow-x:unset;
+            
+            font-family:'Courier New', Courier, monospace;
+        }
+        .glyphsel {
+            width:calc(100% - 80px);
+            height:100%;
+            background-color:#111;
+            color:white;
+            font-family:'Courier New', Courier, monospace;
+            font-size:18px;
+        }
+        .glyphprev {
+            background-color:white;
+            width:80px;
+            height:100%;
+        }
+        #edpcent {
+            width:100%;
+            display:flex;
+            margin-top:10px;
+
+        }
+        #glyphlist {
+            width:25%;
+            background-color:#222;
+            border: 1px solid white;
+        }
+        .glyphbtn {
+            width:20%;
+            height:20px;
+            background-color:black;
+            color:white;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        #bcont1 {
+            display:flex;
+        }
+        #glyphprops {
+            width:25%;
+            height:180px;
+            border: 1px solid white;
+            margin-top:20px;
+        }
+        .plbl {
+            font-family: 'Courier New', Courier, monospace;
+            font-size:18px;
+        }
+        .pinp {
+            width:calc(100% - 20px);
+            background-color:black;
+            color:white;
+            font-size:18px;
+            border: 1px solid white;
+        }
+        #windowlabel {
+            font-size:20px;
+            font-family:'Courier New', Courier, monospace;
+            color:white;
+            text-decoration:underline;
+        }
+    </style>
+</head>
+<body>
+    <h2>Enscrypt</h2>
+    <div id="topbar">
+        <button id="graphicedit" class="tabbtn">Glyph Editor</button>
+        <button id="logicedit" class="tabbtn">Logic Editor</button>
+    </div>
+    
+    <div id="logiceditor" class="tabwindow">
+        <input
+        id="script-input"
+        type="text"
+        placeholder="Type a or b"
+    />
+
+    <div id="script-display"></div>
+
+    <script type="module" src="./main.js" defer></script>
+    <script type="module" src="./editor.js" defer></script>
+    
+    </div>
+    <div id="glypheditor" class="tabwindow">
+        <div id="edpcent">
+            <div id="glyphlist">
+                <div class="glyphselc">
+                    <button class="glyphsel">Glyph1</button>
+                    <div class="glyphprev">
+
+                </div>
+                </div>
+                
+            </div>
+            <div id="edcent">
+                <div id="windowlabel">Variation 1 - Glyph 1</div>
+            <div id="editor-display"></div>
+        </div>
+        </div>
+        <div id="bbar">
+            <button id="newglyph" class="glyphbtn">+Glyph</button>
+            <button id="dupglyph" class="glyphbtn">Duplicate Glyph</button>
+            <button id="newvari" class="glyphbtn">+Variation</button>
+            <button id="dupvari" class="glyphbtn">Duplicate Variation</button>
+        </div>
+        <div id="bcont1">
+            <div id="glyphprops">
+                <div class="plbl">Glyph ID:</div>
+                <input type="text" class="pinp">
+                <div class="plbl">Variation ID:</div>
+                <input type="text" class="pinp">
+                
+            </div>
+            <div id="variationpanel">
+                <button class="variationsel">Variation1</button>
+            </div>
+        
+            
+        </div>
+        
+    </div>
+    
+    
+</body>
+</html>
