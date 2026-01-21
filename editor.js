@@ -50,6 +50,9 @@ function drawCatmullRom(context, pts) {
 let anydragging=false;
 class Stroke {
     constructor() {
+        if (strokes.length==0) {
+            eraseall();
+        }
         this.points=[];
         this.shape = new Konva.Shape({
             stroke: 'black',
@@ -70,7 +73,7 @@ class Stroke {
         this.shape.on('click',function(e) {
             e.cancelBubble = true;
             strokeselection=this;
-            pointselection=[];
+            selectpoints([],true);
             selectstroke(st0);
             curvelayer.draw();
         });
@@ -87,7 +90,7 @@ class Stroke {
                 
             }
             strokeselection=this;
-            pointselection=[];
+            selectpoints([],true);
             selectstroke(st0);
             curvelayer.draw();
         })
@@ -123,7 +126,10 @@ class Stroke {
     }
     setSelected(selected) {
         this.shape.stroke(selected ? 'red' : 'black');
-        strokeselection=this;
+        if (selected) {
+            strokeselection=this;
+        }  
+        
     }
 }
 function selectstroke(s) {
@@ -132,17 +138,21 @@ function selectstroke(s) {
         st.setSelected(st===s);
     }
     strokeselection=s;
+    selectpoints(s.points,true);
     curvelayer.batchDraw();
     console.log(strokeselection);
 
 }
 class Point {
     constructor(x, y) {
+
         this.x = x;
         this.y = y;
         this.stroke=null;
         this.shape=null;
         this.selectionbox=null;
+
+        
         pointselection=[this];
         porttoglyphs();
     }
@@ -165,17 +175,28 @@ class Point {
         layer.draw();
         circle.on('click', function () {
             console.log('Circle clicked at position: (' + this.x() + ', ' + this.y() + ')');
-            pointselection=[this];
-            selectstroke(this.stroke);
+            selectpoints([pt],true);
+            selectstroke(pt.stroke);
             
         });
         circle.on('dragmove', function () {
             const mpos=stage.getPointerPosition();
             pt.x=mpos.x;
             pt.y=mpos.y;
+            if (pt.selectionbox != null) {
+                pt.selectionbox.position({
+                    x: pt.x - 8,
+                    y: pt.y - 8,
+                });
+                selectlayer.batchDraw();
+            }
             drawglyph();
             
         });
+        circle.on('mousedown touchstart',function() {
+            selectpoints([pt],true);
+            console.log(pt.selectionbox);
+        }) 
         drawglyph();
         porttoglyphs();
         return circle;
@@ -206,38 +227,47 @@ stage.add(selectlayer);
 
 strokeselection=null;
 function selectpoints(pts,clearcurrent) {
+    console.log("selecting boxes on ");
+    console.log(pts);
     if (clearcurrent) {
-        for (let p of pointselection) {
-            p.selectionbox.destroy();
-            p.selectionbox=null;
+        for (let s of strokes) {
+            for (let p of s.points) {
+                if (p.selectionbox==null) continue;
+                p.selectionbox.destroy();
+                p.selectionbox=null;
+            }
+            
         }
         pointselection=[];
     }
+    console.log("next loop");
     for (let p of pts) {
         pointselection.push(p);
         const selbox=new Konva.Rect({
             stroke: 'dodgerblue',
             strokeWidth: 2,
-            dash: [4, 4],
+            dash: [4, 2],
             listening: false,
+            x: p.x - 8,
+            y: p.y - 8,
+            width: 16,
+            height: 16,
+            visible:true
         });
-        const box = selbox.getClientRect();
-        selectionRect.setAttrs({
-            x: box.x,
-            y: box.y,
-            width: box.width,
-            height: box.height,
-            visible: true,
-        });
+       
         
         p.selectionbox=selbox;
         selectlayer.add(selbox);
-        selectlayer.batchDraw();
+        
     }
+    console.log("NEWSELECTION");
+    console.log(pointselection);
+    selectlayer.draw();
 }
 
 
 stage.on('contextmenu', function (e) {
+    
   e.evt.preventDefault(); //  stop browser context menu
 
     strokeselection=new Stroke();
@@ -252,6 +282,7 @@ stage.on('click', function (e) {
     const mpos=stage.getPointerPosition();
     const point=strokeselection.newPoint(mpos.x,mpos.y);
     point.toKonva();
+    selectpoints([point],true);
    
 });
 function eraseall() {
@@ -260,27 +291,10 @@ function eraseall() {
     curvelayer.removeChildren();
     curvelayer.draw();
     strokeselection=null;
-    pointselection=[];
+    selectpoints([],true);
     strokes=[];
 
 }
-// function porttoglyphs() {
-//     console.log("PORTING STROKES:...");
-//     console.log(strokes);
-//     glyphvarselection.strokes=[];
-//     for (let si=0;si<strokes.length;si++) {
-//         const st=strokes[si];
-//         const nst=new sys.GlyphStroke(glyphvarselection);
-//         for (let i=0;i<st.points.length;i++) {
-//             const npt=new sys.GlyphStrokePoint(`${glyphvarselection}_${si+i}`,new Victor(st.points[i].x,st.points[i].y),nst);
-//             nst.points.push(npt);  
-            
-//         }
-//     }
-//     console.log("PORTED STROKES NEW STROKES:");
-//     console.log(glyphvarselection.strokes);
-
-// }
 
 function porttoglyphs() {
     if (!glyphvarselection) return;
@@ -377,8 +391,9 @@ function newglyph() {
     loadglyphvar(glyphv);
 }
 function newvariation() {
-    const glyphv=new sys.GlyphVariation(glyphselection,`Variation${Object.keys(glyphselection.variations).length}`);
     porttoglyphs();
+    const glyphv=new sys.GlyphVariation(glyphselection,`Variation${Object.keys(glyphselection.variations).length}`);
+     eraseall();
 
     const btn=doc.variationsel.cloneNode(true);
     btn.innerText=glyphv.id;
@@ -390,6 +405,11 @@ function newvariation() {
     doc.variationpanel.appendChild(btn);
     loadglyphvar(glyphv);
     glyphvarselection=glyphv;
+    selectpoints([],true);
+    strokeselection=null;
+   
+    curvelayer.removeChildren();
+    curvelayer.draw();
 }
 doc.newglyph.addEventListener('click',()=>{
     newglyph();

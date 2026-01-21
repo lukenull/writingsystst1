@@ -464,9 +464,9 @@ class Character { //scales dynamically with longest glyph size but origin stays 
 
 }
 class GlyphStroke {
-    constructor(glyphVariation) {
+    constructor(glyphVariation,id="") {
         this.points=[];
-        this.id="";
+        this.id=id;
         this.glyph=glyphVariation.glyph;
         this.glyphVariation=glyphVariation;
         this.offset=new Victor(0,0); //relative to glyph variation origin
