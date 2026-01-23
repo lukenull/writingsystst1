@@ -1,0 +1,31 @@
+{
+  "name": "writingsystst1",
+  "version": "1.0.0",
+  "description": "wst",
+  "main": "main.js",
+  "scripts": {
+    "test": "main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukenull/writingsystst1.git"
+  },
+  "author": "lukenull",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lukenull/writingsystst1/issues"
+  },
+  "homepage": "https://github.com/lukenull/writingsystst1#readme",
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.0",
+    "@codemirror/commands": "^6.10.1",
+    "@codemirror/lang-javascript": "^6.2.4",
+    "@codemirror/state": "^6.5.4",
+    "@codemirror/view": "^6.39.11",
+    "codemirror": "^6.0.2",
+    "textarea-caret": "^3.1.0"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}

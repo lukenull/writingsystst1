@@ -359,6 +359,7 @@ class GlyphRenderer { //individual one that shows in each character instance
         }
         this.render();
     }
+    
 
 }
 class Glyph {
