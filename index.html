@@ -14,6 +14,7 @@
         #script-display {
             border: 1px solid #aaa;
             margin-top: 10px;
+            background-color:white;
         }
 
         input {
@@ -41,10 +42,10 @@
             width:100%;
         }
         #logiceditor {
-            
+            display:none;
         }
         #glypheditor {
-            display:none;
+            
         }
         #edcent {
             width:75%;
@@ -159,7 +160,9 @@
 
             /* Make the typed text invisible */
             color: transparent;
-
+            display:flex;
+            overflow:auto;
+            white-space:pre;
         }
         #codecontain {
             position:relative;
@@ -179,6 +182,7 @@
             
             background-color:#222;
             color:white;
+            overflow-x:hidden;
         }
         .token.globalfunction {
             color:#ff4757;
@@ -189,7 +193,7 @@
         .token.systemvariable {
             color:#f947ff;
         }
-        #termsuggest {
+        .termsuggest {
             width:200px;
             height:120px;
             display:flex;
@@ -226,6 +230,9 @@
             font-family:'Courier New', Courier, monospace;
             
         }
+        #codesandbox {
+            display:none;
+        }
 
 
     </style>
@@ -253,10 +260,17 @@
     </div>
     
     <div id="logiceditor" class="tabwindow">
+        <iframe
+        id="codesandbox"
+        sandbox="allow-scripts"
+        src="sandbox.html"
+        
+        ></iframe>
+
         <div id="codecontain">
              
              <pre id="codeview" class="codetxt"></pre>
-             <textarea id="codearea" class="codetxt" spellcheck="false"></textarea>
+             <textarea id="codearea" wrap="off" class="codetxt" spellcheck="false"></textarea>
         </div>
        
         <input
@@ -269,7 +283,7 @@
     <script type="module" src="./main.js" defer></script>
     <script type="module" src="./editor.js" defer></script>
      <script type="module" src="./codeeditor.js" defer></script>
-    <div id="termsuggest">
+    <div id="termsuggest" class="termsuggest">
         <div class="termsuggestitem">
             <div class="tsitypeimg"></div>
             <button class="tsilabel">Somecommandherebrothisisaverylong</button>
@@ -300,11 +314,20 @@
             <button id="dupvari" class="glyphbtn">Duplicate Variation</button>
         </div>
         <div id="bcont1">
+            <div id="classsuggest" class="termsuggest">
+        <div class="termsuggestitem">
+            <div class="tsitypeimg"></div>
+            <button class="tsilabel">Somecommandherebrothisisaverylong</button>
+        </div>
+        
+    </div>
             <div id="glyphprops">
                 <div class="plbl">Glyph ID:</div>
-                <input type="text" class="pinp">
+                <input type="text" class="pinp" id="gidinp">
                 <div class="plbl">Variation ID:</div>
-                <input type="text" class="pinp">
+                <input type="text" class="pinp" id="vidinp">
+                <div class="plbl">Glyph Class:</div>
+                <input type="text" class="pinp" id="gidinp">
                 
             </div>
             <div id="variationpanel">

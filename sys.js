@@ -131,6 +131,9 @@ class ScriptDisplay {
         }
         
     }
+    setInputGroups(groups) {
+        this.keyInputGroups=groups;
+    }
     matchLastKeyGroup(targetKeyGroup) {
         const lkg=this.scriptEvent.lastKeyGroup;
         const llet=this.scriptEvent.lastKey;
@@ -208,7 +211,7 @@ class ScriptDisplay {
         this.lastCharacter=char;
         return char;
     }
-    drawGlyph(id,variationId="main",character=this.lastCharacter,transformOverrides=null) {
+    drawGlyph(id,variationId="Variation0",character=this.lastCharacter,transformOverrides=null) {
         const glyph=this.getGlyphById(id);
         if (glyph==null) {
             console.error(`ScriptDisplay: Glyph with id ${id} not found`);
@@ -294,6 +297,7 @@ class GlyphRenderer { //individual one that shows in each character instance
             for (const vec of abspoints) {
                 
                 vec.multiply(new Victor(scale,scale));
+               // vec.add(new Victor(this.character.scriptDisplay.fontScale/2,this.character.scriptDisplay.fontScale/2))
                 console.log(vec);
             }
             function drawCatmullRom(context, pts) {
@@ -420,7 +424,7 @@ class Character { //scales dynamically with longest glyph size but origin stays 
         this.glyphRenderers=[];
         this.scriptDisplay = scriptDisplay;
         this.boundsSize=new Victor(1,1.3); //in font units
-        this.absolutePosition=new Victor(0.5,0);
+        this.absolutePosition=new Victor(0.5,0.5);
         for (const c of this.scriptDisplay.characters) {
             this.absolutePosition.add(new Victor(c.boundsSize.x,0));
         }

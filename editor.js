@@ -2,7 +2,7 @@ import Konva from "https://cdn.jsdelivr.net/npm/konva@9.3.0/+esm";
 import Victor from 'https://cdn.skypack.dev/victor';
 import * as sys from './sys.js';
 import {scriptDisplay} from './main.js';
-
+import getCaretCoordinates from "https://cdn.skypack.dev/textarea-caret";
 const konvasizex=500;
 const konvasizey=500;
 
@@ -16,6 +16,7 @@ for (let e of document.querySelectorAll("*")) {
 }
 doc.glyphsel=document.querySelector(".glyphselc");
 doc.variationsel=document.querySelector(".variationsel");
+doc.classsuggest.style.display="none";
 let strokes=[
 
 ]
@@ -308,7 +309,7 @@ function porttoglyphs() {
         for (let i = 0; i < st.points.length; i++) {
             const npt = new sys.GlyphStrokePoint(
                 `${glyphvarselection.id}_${si}_${i}`,
-                new Victor(st.points[i].x/konvasizex, st.points[i].y/konvasizey),
+                new Victor(-0.5+st.points[i].x/konvasizex, -0.5+st.points[i].y/konvasizey),
                 nst
             );
             nst.points.push(npt);
@@ -330,7 +331,7 @@ function loadglyphvar(glyphvar) {
     for (let s of glyphvar.strokes) {
         const st=new Stroke();
         for (let p of s.points) {
-            const pt=st.newPoint(p.position.x*konvasizex,p.position.y*konvasizey);
+            const pt=st.newPoint((0.5+p.position.x)*konvasizex,(0.5+p.position.y)*konvasizey);
             pt.toKonva();
         }
         
@@ -389,6 +390,7 @@ function newglyph() {
     doc.glyphlist.appendChild(btn);
     loadglyph(glyph);
     loadglyphvar(glyphv);
+    scriptDisplay.glyphs.push(glyph);
 }
 function newvariation() {
     porttoglyphs();
@@ -416,4 +418,18 @@ doc.newglyph.addEventListener('click',()=>{
 })
 doc.newvari.addEventListener('click',()=>{
     newvariation();
+})
+let ovidin="";
+doc.vidinp.addEventListener("input",()=>{
+    if (glyphselection.variations.hasOwnProperty(ovidin)) {
+        delete glyphselection.variations[ovidin];
+    }
+    glyphvarselection.id=doc.vidinp.value;
+    glyphselection.variations[doc.vidinp.value]=glyphvarselection;
+    ovidin=doc.vidinp.value;
+    doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
+})
+doc.gidinp.addEventListener('input',()=>{
+    glyphselection.id=doc.gidinp.value;
+    doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
 })

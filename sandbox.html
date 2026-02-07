@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+/* ============================
+   RPC plumbing
+============================ */
+
+let callId = 0;
+const pending = new Map();
+
+window.addEventListener("message", e => {
+  const msg = e.data;
+  if (msg.type === "return" || msg.type === "error") {
+    const cb = pending.get(msg.callId);
+    if (cb) {
+      pending.delete(msg.callId);
+      msg.type === "error" ? cb.reject(msg.error) : cb.resolve(msg.result);
+    }
+  }
+});
+/* sandbox.html - Updated RPC and Proxy Logic */
+
+function rpc(method, args, targetId = undefined) {
+  return new Promise((resolve, reject) => {
+    const id = callId++;
+    pending.set(id, { resolve, reject });
+
+    parent.postMessage({
+      type: "call",
+      method,
+      args,
+      callId: id,
+      targetId: targetId // Pass the ID of the object we are calling
+    }, "*");
+  });
+}
+
+// Function to turn a handle from the main thread into a callable Proxy
+function createObjectProxy(id) {
+  return new Proxy({}, {
+    get(_, prop) {
+      // Return a function that triggers an RPC call targeting this specific object ID
+      return (...args) => {
+        return rpc(prop, args, id).then(result => {
+            // If the result of THIS call is also an object, wrap it too (chaining)
+            if (result && result.__isProxy) {
+                return createObjectProxy(result.id);
+            }
+            return result;
+        });
+      };
+    }
+  });
+}
+
+window.addEventListener("message", e => {
+  const msg = e.data;
+  if (msg.type === "return" || msg.type === "error") {
+    const cb = pending.get(msg.callId);
+    if (cb) {
+      pending.delete(msg.callId);
+      if (msg.type === "error") {
+        cb.reject(msg.error);
+      } else {
+        // Check if the returned value is a proxy handle
+        const data = (msg.result && msg.result.__isProxy) 
+            ? createObjectProxy(msg.result.id) 
+            : msg.result;
+        cb.resolve(data);
+      }
+    }
+  }
+});
+
+/* ============================
+   Auto-proxy API
+============================ */
+
+const ScriptDisplay = new Proxy({}, {
+  get(_, prop) {
+    return (...args) => rpc(prop, args);
+  }
+});
+
+// optional alias
+//const sys = ScriptDisplay;
+const sys = new Proxy({}, {
+  get(_, prop) {
+    if (prop === "onInput") {
+      return fn => {
+        const id = registerCallback("onInput", fn);
+
+        parent.postMessage({
+          type: "register",
+          event: "onInput",
+          id
+        }, "*");
+      };
+    }
+
+    // normal RPC for everything else
+    return (...args) => rpc(prop, args);
+  }
+});
+
+/* ============================
+   User code execution
+============================ */
+
+function runUserCode(code) {
+  try {
+    // wipe previous state if you want:
+    // delete window.userContext;
+
+    const fn = new Function("ScriptDisplay", "sys", code);
+    fn(ScriptDisplay, sys);
+  } catch (err) {
+    console.error("User script error:", err);
+  }
+}
+const callbacks = {
+  onInput: new Map()
+};
+
+let cbId = 0;
+
+function registerCallback(type, fn) {
+  const id = cbId++;
+  callbacks[type].set(id, fn);
+  return id;
+}
+
+window.addEventListener("message", e => {
+  if (e.data.type === "run") {
+    runUserCode(e.data.code);
+  }
+});
+window.addEventListener("message", e => {
+  if (e.data.type === "event") {
+    const { event, id, data } = e.data;
+    const fn = callbacks[event]?.get(id);
+    if (fn) fn(data);
+  }
+});
+
+</script>
+</body>
+</html>

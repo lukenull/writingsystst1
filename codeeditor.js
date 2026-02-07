@@ -1,5 +1,7 @@
 const codefield=document.getElementById("codearea");
 const codeview=document.getElementById("codeview");
+const latinin=document.getElementById("script-input");
+const sandbox=document.getElementById("codesandbox");
 import * as sys from './sys.js'
 import {scriptDisplay} from './main.js'
 import Prism from "https://esm.sh/prismjs";
@@ -12,7 +14,9 @@ import "https://esm.sh/prismjs/components/prism-javascript";
 // import { javascript } from "@codemirror/lang-javascript"; // For language support
 // import { syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language"; // For highlighting
 // import {autocompletion} from "@codemirror/autocomplete";
-import getCaretCoordinates from "textarea-caret";
+// import getCaretCoordinates from "textarea-caret";
+import getCaretCoordinates from "https://cdn.skypack.dev/textarea-caret";
+
 
 const termsuggest=document.getElementById("termsuggest");
 termsuggest.style.display="none";
@@ -74,9 +78,9 @@ function dosuggest() {
     if (starti>-1) {
         const endcs=cumulstr.substring(starti+4);
         
-        for (let cat in highlight) {
+        for (let cat of [highlight.functions,highlight.variables]) {
         
-            for (let thing of highlight[cat].strings) {
+            for (let thing of cat.strings) {
                 
                 if (thing.startsWith(endcs)) {
                     
@@ -96,33 +100,66 @@ function dosuggest() {
         termsuggest.style.display="none";
     }
 }
-
+function updcodeview() {
+    const highlighted = Prism.highlight(
+    codefield.value, 
+    Prism.languages.javascript, 
+    'javascript'
+    );
+    codeview.innerHTML=highlighted;
+}
 codefield.addEventListener('input',()=>{
     
     let str=codefield.value;
     let cumulstr=codefield.value.substring(0,codefield.selectionStart);
     const lastch=cumulstr.at(-1);
     if (brackets.hasOwnProperty(lastch)) {
-        codefield.value+=brackets[lastch];
+        codefield.value=`${cumulstr}${brackets[lastch]}${codefield.value.substring(codefield.selectionStart)}`;
         str=codefield.value;
 
         codefield.setSelectionRange(str.length-1,str.length-1);
     }
      
      
-    const highlighted = Prism.highlight(
-    str, 
-    Prism.languages.javascript, 
-    'javascript'
-    );
-    codeview.innerHTML=highlighted;
+    updcodeview();
     dosuggest();
+    
 });
 
 
+function runCodeInSandbox() {
+  sandbox.contentWindow.postMessage({
+    type: "run",
+    code: codefield.value
+  }, "*");
+}
+codefield.value=`
 
+sys.keyInputGroups=["ka", "ba", "na"]; //Enter the Latin letter (keyboard key) groups for each of your language's phonemes. Or, you can put ones here for special commands. Or the letters can do whatever you want them to.
+sys.onInput(async event => { //Called every time you type a letter into the Latin input field.
+    const lastsyllable = await sys.getLastEntryKeyGroup(); //Gets the last key group that exists in the string typed so far.
 
+    //Enter your writing system logic here.
+    //Or delete this template code and write it from the ground up.
 
+});
+
+`
+updcodeview();
+codefield.onscroll=()=>{
+    codeview.scrollTop=codefield.scrollTop;
+    codeview.scrollLeft=codefield.scrollLeft;
+}
+codefield.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.ctrlKey) {
+    e.preventDefault();
+    runCodeInSandbox();
+  }
+});
+latinin.addEventListener("input",()=>{
+    console.log(scriptDisplay.glyphs)
+    console.log(scriptDisplay.keyInputGroups);
+})
 
 // function customCompletions(context) {
 //   // 1. Match the object and the optional property after the dot
