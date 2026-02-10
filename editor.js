@@ -323,9 +323,15 @@ function porttoglyphs() {
 
 doc.glyphsel.style.display="none";
 doc.variationsel.style.display="none";
+let glyphbtnselection=null;
+let glyphvarbtnselection=null;
 function loadglyphvar(glyphvar) {
     eraseall();
     glyphvarselection=glyphvar;
+    if (glyphvar) {
+         doc.vidinp.value=glyphvar.id;
+    }
+   
     console.log("STROKEYS");
     console.log(glyphvar.strokes);
     for (let s of glyphvar.strokes) {
@@ -338,6 +344,7 @@ function loadglyphvar(glyphvar) {
     }
     console.log("STROKEYS ADDED");
     console.log(strokes);
+    
     doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
     
     drawglyph();
@@ -355,6 +362,7 @@ function loadglyph(glyphobj) {
         
         const btn=doc.variationsel.cloneNode(true);
         btn.innerText=v.id;
+        v.customProperties.propbutton=btn;
         btn.addEventListener('click',()=>{
             porttoglyphs();
             loadglyphvar(v);
@@ -368,6 +376,7 @@ function loadglyph(glyphobj) {
         o+=1;
         
     }
+    doc.gidinp.value=glyphobj.id;
     loadglyphvar(oc);
     
 }
@@ -379,10 +388,12 @@ function newglyph() {
     glyphselection=glyph;
     glyphvarselection=glyphv;
     const btn=doc.glyphsel.cloneNode(true);
+    glyphbtnselection=btn;
     btn.querySelector(".glyphsel").innerText=glyph.id;
     console.log("makingnewglyphbtn");
     console.log(btn);
     btn.addEventListener('click',()=>{
+        glyphbtnselection=btn;
         loadglyph(glyph);
     })
     
@@ -390,6 +401,8 @@ function newglyph() {
     doc.glyphlist.appendChild(btn);
     loadglyph(glyph);
     loadglyphvar(glyphv);
+    glyph.customProperties.propbutton=btn.querySelector(".glyphsel");
+
     scriptDisplay.glyphs.push(glyph);
 }
 function newvariation() {
@@ -398,10 +411,13 @@ function newvariation() {
      eraseall();
 
     const btn=doc.variationsel.cloneNode(true);
+    glyphvarbtnselection=btn;
     btn.innerText=glyphv.id;
+    glyphv.customProperties.propbutton=btn;
     btn.addEventListener('click',()=>{
         porttoglyphs();
         loadglyphvar(glyphv);
+        glyphvarbtnselection=btn;
     })
      btn.style.display="flex";
     doc.variationpanel.appendChild(btn);
@@ -427,9 +443,12 @@ doc.vidinp.addEventListener("input",()=>{
     glyphvarselection.id=doc.vidinp.value;
     glyphselection.variations[doc.vidinp.value]=glyphvarselection;
     ovidin=doc.vidinp.value;
-    doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
+    doc.windowlabel.innerText=`${glyphvarselection.id} - ${glyphselection.id}`;
+    
+    glyphvarselection.customProperties.propbutton.innerText=`${doc.vidinp.value}`
 })
 doc.gidinp.addEventListener('input',()=>{
     glyphselection.id=doc.gidinp.value;
-    doc.windowlabel.innerText=`${glyphvar.id} - ${glyphselection.id}`;
+    doc.windowlabel.innerText=`${glyphvarselection.id} - ${glyphselection.id}`;
+    glyphselection.customProperties.propbutton.innerText=`${doc.gidinp.value}`;
 })

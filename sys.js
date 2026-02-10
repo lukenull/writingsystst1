@@ -258,6 +258,7 @@ class GlyphVariation {
         this.offset=new Victor(0,0); //relative to glyph origin
         this.offsetRotation=0; //degrees, relative to glyph rotation
         glyph.variations[id]=this;
+        this.customProperties={};
     }
     
 }
@@ -373,6 +374,7 @@ class Glyph {
         this.id=null;
         this.offset=new Victor(0,0); //relative to character origin
         this.offsetRotation=0; //degrees
+        this.customProperties={};
     }
     draw(character,variationId,transformOverrides) {
        

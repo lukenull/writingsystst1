@@ -128,6 +128,7 @@ codefield.addEventListener('input',()=>{
 
 
 function runCodeInSandbox() {
+sandbox.src=sandbox.src;
   sandbox.contentWindow.postMessage({
     type: "run",
     code: codefield.value
@@ -141,7 +142,7 @@ sys.onInput(async event => { //Called every time you type a letter into the Lati
 
     //Enter your writing system logic here.
     //Or delete this template code and write it from the ground up.
-
+    
 });
 
 `
